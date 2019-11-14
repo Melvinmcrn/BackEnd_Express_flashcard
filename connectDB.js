@@ -5,7 +5,11 @@ var connection = mysql.createConnection({
     password: 'password',
     database: 'indiv2019_1'
 })
-connection.connect();
+try {
+    connection.connect();
+} catch (err) {
+    console.error(err);
+}
 
 exports.getTable = function (query, callback) {
     console.log("connectDB/getTable");
@@ -21,7 +25,7 @@ exports.getTable = function (query, callback) {
         }
         return callback(output);
     })
-    
+
 }
 
 exports.insertUpdateDelete = function (query) {
