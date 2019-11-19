@@ -56,15 +56,16 @@ app.post("/login", loginMiddleWare, (req, res) => {
   };
   let token = jwt.encode(payload, SECRET);
 
-  fs.readFile('myjsonfile.json', 'utf8', function readFileCallback(err, data){
-    if (err){
-        console.log(err);
+  fs.readFile('./src/data/token.json', 'utf8', function readFileCallback(err, data) {
+    if (err) {
+      console.error(err);
     } else {
-    obj = JSON.parse(data); //now it an object
-    obj.table.push({id: 2, square:3}); //add some data
-    json = JSON.stringify(obj); //convert it back to json
-    fs.writeFile('myjsonfile.json', json, 'utf8', callback); // write it back 
-}});
+      let obj = JSON.parse(data); //now it an object
+      obj.table.push({ id: 2, square: 3 }); //add some data
+      json = JSON.stringify(obj); //convert it back to json
+      fs.writeFile('myjsonfile.json', json, 'utf8', callback); // write it back 
+    }
+  });
   res.json(token);
 });
 
