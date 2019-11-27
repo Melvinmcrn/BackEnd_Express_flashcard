@@ -42,7 +42,7 @@ exports.getDeck = function (req, res) {
         data = output.reduce((acc, it) => {
             (acc[it.WORD_ID] = acc[it.WORD_ID] || []).push(it.WORD);
             return acc;
-        }, {} );
+        }, {});
         res.json(data);
     });
 

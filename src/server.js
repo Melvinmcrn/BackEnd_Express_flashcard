@@ -1,20 +1,30 @@
 const express = require("express"); // เสมือน import package มาใช้งาน
 const app = express(); // สร้าง Express Application ลองกด ctrl + คลิกเข้าไปดูในไส้ใน
 const bodyParser = require("body-parser");
+const passport = require('passport');
+// const fs = require('fs');
+const cookieParser = require('cookie-parser');
+const func = require('./function');
+const auth = require('./auth');
+require('./passport');
+
+
 app.use(express.static('public'));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
-var func = require('./function');
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  req.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
 /* import library ที่จำเป็นทั้งหมด */
 const jwt = require("jwt-simple");
-const passport = require("passport");
+// const passport = require("passport");
 //ใช้ในการ decode jwt ออกมา
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 //ใช้ในการประกาศ Strategy
@@ -37,41 +47,14 @@ const requireJWTAuth = passport.authenticate("jwt", { session: false });
 app.get("/", requireJWTAuth, (req, res) => {
   res.send("ยอดเงินคงเหลือ 50");
 });
-//ทำ Middleware สำหรับขอ JWT
-const loginMiddleWare = (req, res, next) => {
-  console.log("[ATTEMPT LOGIN] username: " + req.body.username + " password: " + req.body.password);
-  if (req.body.username === "melvinmcrn"
-    && req.body.password === "7153798") {
-    next();
-  } else {
-    console.log("[LOGIN FAIL]");
-    res.json("LOGIN_FAIL");
-  }
-};
-app.post("/login", loginMiddleWare, (req, res) => {
-  console.log("[LOGIN SUCCESS] username: " + req.body.username);
-  const payload = {
-    sub: req.body.username,
-    iat: new Date().getTime()
-  };
-  let token = jwt.encode(payload, SECRET);
 
-  fs.readFile('./src/data/token.json', 'utf8', function readFileCallback(err, data) {
-    if (err) {
-      console.error(err);
-    } else {
-      let obj = JSON.parse(data); //now it an object
-      obj.table.push({ id: 2, square: 3 }); //add some data
-      json = JSON.stringify(obj); //convert it back to json
-      fs.writeFile('myjsonfile.json', json, 'utf8', callback); // write it back 
-    }
-  });
-  res.json(token);
+// [DONE] login with username and password -> set access-token in cookies
+app.post("/login", auth.loginMiddleWare, (req, res) => {
+  auth.generateJWT(req, res);
 });
 
 app.post("/register", (req, res) => {
-  console.log(req.body);
-  res.json("melvin5555555555555");
+  auth.registerNewUser(req, res);
 });
 
 app.get("/", (req, res) => {
