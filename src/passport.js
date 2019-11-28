@@ -1,47 +1,51 @@
 //passport.js
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const passportJWT = require("passport-jwt");
-const CookieStrategy = require("passport-cookie");
-const JWTStrategy = passportJWT.Strategy;
-const ExtractJWT = passportJWT.ExtractJwt;
-const connectDB = require("./connectDB");
 
-// COOKIE Strategy ####################################################################################
-// passport.use(new CookieStrategy(
-//     function (token, done) {
-//         console.log(token);
-//         // User.findByToken({ token: token }, function (err, user) {
-//         //     if (err) { return done(err); }
-//         //     if (!user) { return done(null, false); }
-//         //     return done(null, user);
-//         // });
-//         let user;
-//         return done(null, user);
-//     }
-// ));
+const passport = require('passport');
+const passportJWT = require("passport-jwt");
+const JWTStrategy = passportJWT.Strategy;
+const connectDB = require("./connectDB");
+const SECRET = require('./data/key').SECRET_KEY;
+const cookieParser = require('cookie-parser');
+passport.use(cookieParser());
+
+const cookieExtractor = (req) => {
+    console.log("cookie extractor");
+    let token = null;
+    if (req && req.cookies) {
+        token = req.cookies['access-token']
+    };
+    console.log(token);
+    return token;
+};
+
 
 // JWT Strategy ######################################################################################
 
 passport.use(new JWTStrategy({
-    // jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    jwtFromRequest: req => req.cookies.token,
-    secretOrKey: 'MELVINMCRN'
+    jwtFromRequest: req => cookieExtractor(req),
+    secretOrKey: SECRET
 },
     (jwtPayload, done) => {
+        let username = jwtPayload.sub;
 
-        //find the user in db if needed. This functionality may be omitted if you store everything you'll need in JWT payload.
-        // return UserModel.findOneById(jwtPayload.id)
-        return ((jwtPayload) => {
-            console.log("JWT PAY LOAD");
-            console.log(jwtPayload);
-            return "melvinmcrn"
-        })
-            .then(user => {
-                return done(null, user);
-            })
-            .catch(err => {
-                return done(err, false);
+        // NO TOKEN FOUND
+        if (jwtPayload === null) return done(null, false);
+
+        try {
+            connectDB.getUserbyUsername(username, (userTable) => {
+                userTable = JSON.parse(JSON.stringify(userTable));
+
+                // FOUND 0 ROW
+                if (!userTable.length) {
+                    return done(null, false);
+                } else {
+                    return done(null, userTable);
+                }
+
             });
+        } catch (err) {
+            return done(err, false);
+        };
+    
     }
 ));

@@ -3,7 +3,7 @@ const jwt = require("jwt-simple");
 const connectDB = require("./connectDB");
 
 // SECRET KEY
-const SECRET = "MELVINMCRN"
+const SECRET = require('./data/key').SECRET_KEY;
 
 // ทำ Middleware สำหรับขอ JWT
 exports.loginMiddleWare = (req, res, next) => {
@@ -18,15 +18,19 @@ exports.loginMiddleWare = (req, res, next) => {
     console.log("[ATTEMPT LOGIN] username: " + username + " | password: " + password);
 
     connectDB.getUserbyUsername(username, (userTable) => {
-        userTable = JSON.parse(JSON.stringify(userTable))[0];
+        userTable = JSON.parse(JSON.stringify(userTable));
 
         // FOUND 0 ROW
-        if (!Object.keys(userTable).length) {
+        if (!userTable.length) {
             console.log("[LOGIN FAIL] not found user: " + username);
             res.status(701).send("[LOGIN FAIL] not found user: " + username);
+            return;
 
-            // PASSWORD NOT MATCH
-        } else if (userTable.Password !== password) {
+        }
+
+        userTable = userTable[0];
+        // PASSWORD NOT MATCH
+        if (userTable.Password !== password) {
             console.log("[LOGIN FAIL] wrong password for user: " + username);
             res.status(702).send("[LOGIN FAIL] wrong password for user: " + username);
 
@@ -92,7 +96,7 @@ exports.generateJWT = (req, res) => {
     let token = jwt.encode(payload, SECRET);
     connectDB.addTokenToUser(username, token, (result) => {
         if (result) {
-            res.cookie("access-token", token, { httpOnly: true, maxAge: 500000 }).send("LOGIN_SUCCESS " + Date.now());
+            res.cookie("access-token", token, { httpOnly: true, maxAge: 5000000 }).send("LOGIN_SUCCESS " + Date.now());
         } else {
             res.status(704).send("[ERROR] error in adding token to DB");
         }
