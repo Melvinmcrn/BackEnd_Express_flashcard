@@ -9,12 +9,12 @@ const cookieParser = require('cookie-parser');
 passport.use(cookieParser());
 
 const cookieExtractor = (req) => {
-    console.log("cookie extractor");
+    // console.log("cookie extractor");
     let token = null;
     if (req && req.cookies) {
         token = req.cookies['access-token']
     };
-    console.log(token);
+    // console.log(token);
     return token;
 };
 

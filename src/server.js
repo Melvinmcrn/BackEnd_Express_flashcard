@@ -22,6 +22,20 @@ app.use((req, res, next) => {
   next();
 });
 
+// LOGOUT -> clear access-token in cookie
+app.get("/logout", function(req, res) {
+  res.clearCookie('access-token');
+  res.send("LOGGED OUT, COOKIE CLEARED");
+});
+
+app.get("/getUsername", requireJWTAuth, (req,res) => {
+  if (!req.user || !req.user[0]) {
+    res.status(900).send("USER NOT FOUND");
+  } else {
+    res.send(req.user[0].Username);
+  }
+});
+
 // [DONE] login with username and password -> set access-token in cookies
 app.post("/login", auth.loginMiddleWare, (req, res) => {
   auth.generateJWT(req, res);

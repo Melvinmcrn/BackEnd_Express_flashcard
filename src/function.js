@@ -19,21 +19,20 @@ const groupBy = (array, key) => {
 
 exports.getAllDeck = function (req, res) {
 
-    console.log("/CardDeck");
+    // console.log("/CardDeck");
     let data = "";
     connectDB.getTable("SELECT DECK_NAME FROM DECK;", function (output) {
         data = output.map(obj => {
             return obj["DECK_NAME"];
         });
-        console.log(data)
+        // console.log(data)
         res.json(data);
     });
 }
 
 exports.getDeck = function (req, res) {
-
     let DeckName = req.params.DeckName;
-    console.log("/CardDeck/" + DeckName);
+    // console.log("/CardDeck/" + DeckName);
     let data = "";
     connectDB.getTable("SELECT WORD_ID, WORD FROM indiv2019_1.deckword \
                         WHERE DECK_NAME = '" + DeckName + "'\

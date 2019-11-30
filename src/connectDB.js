@@ -13,8 +13,8 @@ try {
 }
 
 exports.getTable = function (query, callback) {
-    console.log("connectDB/getTable");
-    console.log("query: " + query);
+    // console.log("connectDB/getTable");
+    // console.log("query: " + query);
     var output;
     connection.query(query, function (err, rows, fields) {
         if (err) {
